@@ -1,4 +1,5 @@
 #include "hypertext_string.h"
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdio>
@@ -9,8 +10,22 @@
 
 static std::string _to_hypertext(std::string_view src)
 {
-	std::string newstr{src};
+	auto correct_char = [](int c) {
+		return std::isalpha(c) || std::isdigit(c) || c == '-' ||
+		       c == '_';
+	};
+	char buf[4]{};
+	auto replace_char = [&buf](int c) {
+		std::sprintf(buf, "%%%.2X", c);
+		return buf;
+	};
 
+	std::string newstr{};
+	newstr.reserve(src.length());
+	std::for_each(src.begin(), src.end(), [&](char c) {
+		correct_char(c) ? newstr.append(1, c)
+				: newstr.append(replace_char(c));
+	});
 	return newstr;
 }
 
@@ -18,9 +33,8 @@ static std::string _to_hypertext(std::string_view src)
 static char _newchar(std::string_view code)
 {
 	size_t pos;
-	if (code.length() < 3)
-		throw std::invalid_argument{
-			"ASCII код должен иметь вид %XX"};
+	if (code.length() != 3)
+		throw std::invalid_argument{"ASCII код должен иметь вид %XX"};
 
 	return static_cast<char>(std::stoi(code.data() + 1, &pos, 16));
 };
