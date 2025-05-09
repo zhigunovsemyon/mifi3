@@ -1,5 +1,6 @@
 #include "hypertext_string.h"
 #include <cassert>
+#include <iostream>
 #include <print>
 
 using namespace std::literals::string_literals;
@@ -19,9 +20,15 @@ void test()
 int main()
 try {
 	test();
-	std::println("{}", to_hypertext("\n!@#$%^&*()-_+=?"));
+
+	std::string str{};
+	std::getline(std::cin, str);
+
+	std::println("Кодированная строка: {}", to_hypertext(str));
+	std::println("Декодированная строка: {}", from_hypertext(str));
+
 	return EXIT_SUCCESS;
 } catch (std::exception const & e) {
-	std::println(stderr, "Ошибка: {}", e.what());
+	std::println(stderr, "\nОшибка: {}", e.what());
 	return EXIT_FAILURE;
 }
